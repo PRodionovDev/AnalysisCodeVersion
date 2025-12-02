@@ -14,7 +14,10 @@ import (
 func main() {
 	var catalog string
 	fmt.Println("Please enter the name of the catalog: ")
-	fmt.Fscan(os.Stdin, &catalog)
+	_, err := fmt.Fscan(os.Stdin, &catalog)
+	if err != nil {
+		return
+	}
 
 	searchWords := getSearchWord()
 
@@ -31,7 +34,12 @@ func getSearchWord() []string {
 	if err != nil {
 		log.Fatal("Error couldn't open file:", err)
 	}
-	defer searchCsv.Close()
+	defer func(searchCsv *os.File) {
+		err := searchCsv.Close()
+		if err != nil {
+
+		}
+	}(searchCsv)
 
 	reader := csv.NewReader(searchCsv)
 
@@ -53,7 +61,7 @@ func getSearchWord() []string {
 func getDirectories(catalog string) []string {
 	var dirs []string
 
-	filepath.WalkDir("../"+catalog, func(path string, d os.DirEntry, err error) error {
+	err := filepath.WalkDir("../"+catalog, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -62,6 +70,9 @@ func getDirectories(catalog string) []string {
 		}
 		return nil
 	})
+	if err != nil {
+		return nil
+	}
 
 	return dirs
 }
@@ -86,7 +97,12 @@ func checkFile(path string, searchWords []string) bool {
 		fmt.Println("ERROR couldn't open file:", err)
 		return false
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
 
 	var errorFiles []string
 
