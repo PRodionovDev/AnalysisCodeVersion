@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/csv"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -15,12 +16,38 @@ func main() {
 	fmt.Println("Please enter the name of the catalog: ")
 	fmt.Fscan(os.Stdin, &catalog)
 
+	searchWords := getSearchWord()
+
 	var dirs []string
 	dirs = getDirectories(catalog)
 
 	for _, dir := range dirs {
-		checkFiles(dir)
+		checkFiles(dir, searchWords)
 	}
+}
+
+func getSearchWord() []string {
+	searchCsv, err := os.Open("search.csv")
+	if err != nil {
+		log.Fatal("Error couldn't open file:", err)
+	}
+	defer searchCsv.Close()
+
+	reader := csv.NewReader(searchCsv)
+
+	records, err := reader.ReadAll()
+	if err != nil {
+		log.Fatal("Error couldn't read CSV:", err)
+	}
+
+	var searchWords []string
+	for _, record := range records {
+		for _, value := range record {
+			searchWords = append(searchWords, value)
+		}
+	}
+
+	return searchWords
 }
 
 func getDirectories(catalog string) []string {
@@ -39,7 +66,7 @@ func getDirectories(catalog string) []string {
 	return dirs
 }
 
-func checkFiles(path string) {
+func checkFiles(path string, searchWords []string) {
 	phpFiles, err := ioutil.ReadDir(path)
 	if err != nil {
 		log.Fatal(err)
@@ -48,15 +75,12 @@ func checkFiles(path string) {
 	for _, phpFile := range phpFiles {
 		if !phpFile.IsDir() && strings.HasSuffix(strings.ToLower(phpFile.Name()), ".php") {
 			// todo: gorutine
-			checkFile(path + "/" + phpFile.Name())
+			checkFile(path+"/"+phpFile.Name(), searchWords)
 		}
 	}
 }
 
-func checkFile(path string) bool {
-	// todo: replace to read file with version
-	searchWords := []string{"php", "function"}
-
+func checkFile(path string, searchWords []string) bool {
 	file, err := os.Open(path)
 	if err != nil {
 		fmt.Println("ERROR couldn't open file:", err)
