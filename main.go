@@ -74,8 +74,7 @@ func checkFile(path string) bool {
 
 		for _, word := range wordsInLine {
 			for _, searchWord := range searchWords {
-				// todo: check part of word
-				if word == searchWord {
+				if strings.Contains(word, searchWord) {
 					errorFiles = append(errorFiles, path)
 				}
 			}
