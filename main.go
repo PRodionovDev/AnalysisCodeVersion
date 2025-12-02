@@ -47,6 +47,7 @@ func checkFiles(path string) {
 
 	for _, phpFile := range phpFiles {
 		if !phpFile.IsDir() && strings.HasSuffix(strings.ToLower(phpFile.Name()), ".php") {
+			// todo: gorutine
 			checkFile(path + "/" + phpFile.Name())
 		}
 	}
@@ -73,6 +74,7 @@ func checkFile(path string) bool {
 
 		for _, word := range wordsInLine {
 			for _, searchWord := range searchWords {
+				// todo: check part of word
 				if word == searchWord {
 					errorFiles = append(errorFiles, path)
 				}
