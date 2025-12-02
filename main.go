@@ -63,6 +63,8 @@ func checkFile(path string) bool {
 	}
 	defer file.Close()
 
+	var errorFiles []string
+
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
@@ -72,11 +74,13 @@ func checkFile(path string) bool {
 		for _, word := range wordsInLine {
 			for _, searchWord := range searchWords {
 				if word == searchWord {
-					fmt.Printf("Find: '%s' in '%s'\n", word, path)
-					break
+					errorFiles = append(errorFiles, path)
 				}
 			}
 		}
+	}
+	if len(errorFiles) > 0 {
+		fmt.Printf("Find %d errors in '%s'\n", len(errorFiles), path)
 	}
 
 	return true
