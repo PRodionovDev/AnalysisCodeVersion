@@ -38,7 +38,7 @@ func getDirectories(catalog string) []string {
 	return dirs
 }
 
-func checkFiles(path string) bool {
+func checkFiles(path string) {
 	phpFiles, err := ioutil.ReadDir(path)
 	if err != nil {
 		log.Fatal(err)
@@ -46,9 +46,12 @@ func checkFiles(path string) bool {
 
 	for _, phpFile := range phpFiles {
 		if !phpFile.IsDir() && strings.HasSuffix(strings.ToLower(phpFile.Name()), ".php") {
-			fmt.Println(phpFile.Name())
+			checkFile(phpFile.Name())
 		}
 	}
+}
 
+func checkFile(path string) bool {
+	fmt.Println(path)
 	return true
 }
