@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 func main() {
@@ -24,9 +25,14 @@ func main() {
 	var dirs []string
 	dirs = getDirectories(catalog)
 
+	var wg sync.WaitGroup
+	wg.Add(len(dirs))
+
 	for _, dir := range dirs {
-		checkFiles(dir, searchWords)
+		go checkFiles(dir, searchWords, &wg)
 	}
+
+	wg.Wait()
 }
 
 func getSearchWord() []string {
@@ -77,7 +83,7 @@ func getDirectories(catalog string) []string {
 	return dirs
 }
 
-func checkFiles(path string, searchWords []string) {
+func checkFiles(path string, searchWords []string, wg *sync.WaitGroup) {
 	phpFiles, err := ioutil.ReadDir(path)
 	if err != nil {
 		log.Fatal(err)
@@ -85,10 +91,11 @@ func checkFiles(path string, searchWords []string) {
 
 	for _, phpFile := range phpFiles {
 		if !phpFile.IsDir() && strings.HasSuffix(strings.ToLower(phpFile.Name()), ".php") {
-			// todo: gorutine
 			checkFile(path+"/"+phpFile.Name(), searchWords)
 		}
 	}
+
+	wg.Done()
 }
 
 func checkFile(path string, searchWords []string) bool {
