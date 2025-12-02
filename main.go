@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -46,12 +47,37 @@ func checkFiles(path string) {
 
 	for _, phpFile := range phpFiles {
 		if !phpFile.IsDir() && strings.HasSuffix(strings.ToLower(phpFile.Name()), ".php") {
-			checkFile(phpFile.Name())
+			checkFile(path + "/" + phpFile.Name())
 		}
 	}
 }
 
 func checkFile(path string) bool {
-	fmt.Println(path)
+	// todo: replace to read file with version
+	searchWords := []string{"php", "function"}
+
+	file, err := os.Open(path)
+	if err != nil {
+		fmt.Println("ERROR couldn't open file:", err)
+		return false
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		wordsInLine := strings.Fields(line)
+
+		for _, word := range wordsInLine {
+			for _, searchWord := range searchWords {
+				if word == searchWord {
+					fmt.Printf("Find: '%s' in '%s'\n", word, path)
+					break
+				}
+			}
+		}
+	}
+
 	return true
 }
